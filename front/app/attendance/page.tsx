@@ -90,6 +90,7 @@ export default function AttendancePage() {
   }, [selectedClass, token, date])
 
   const fetchClasses = async () => {
+    if (!token) return
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, {
         headers: { Authorization: `Bearer ${token}` },

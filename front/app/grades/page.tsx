@@ -114,25 +114,37 @@ export default function GradesPage() {
   }, [formClass, token])
 
   const fetchMyGrades = async () => {
+    if (!user || !token) return
     setLoading(true)
     try {
-      // 1. Find my Student Profile
-      const studentsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students`, {
+      // Use the newly created /me endpoint
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (!studentsRes.ok) throw new Error("Failed to fetch students")
 
-      const studentsData = await studentsRes.json()
-      const myProfile = studentsData.find((s: any) => s.userId._id === user?.id || s.userId === user?.id)
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Unknown error" }))
+        console.error(`Fetch profile failed with status ${res.status}:`, errorData)
 
-      if (myProfile) {
-        setSelectedStudent(myProfile._id)
-      } else {
-        console.error("Student profile not found")
+        if (res.status === 404) {
+          toast.error("Student profile not found. Please contact admin.")
+        } else if (res.status === 403) {
+          toast.error("Access denied. Are you logged in as a student?")
+        } else {
+          toast.error(`Error ${res.status}: ${errorData.message || "Failed to fetch student profile"}`)
+          throw new Error(`Failed to fetch student profile (Status: ${res.status})`)
+        }
         setLoading(false)
+        return
+      }
+
+      const myProfile = await res.json()
+      if (myProfile && myProfile._id) {
+        setSelectedStudent(myProfile._id)
       }
     } catch (error) {
       console.error("Failed to fetch my grades", error)
+      toast.error("Error loading profile")
       setLoading(false)
     }
   }

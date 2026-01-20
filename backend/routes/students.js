@@ -4,6 +4,29 @@ import Student from "../models/Student.js"
 
 const router = express.Router()
 
+router.get("/me", roleMiddleware(["student"]), async (req, res) => {
+  try {
+    let student = await Student.findOne({ userId: req.user.id }).populate("userId classId parentId")
+
+    // Lazy profile creation if missing
+    if (!student) {
+      console.log(`Lazily creating student profile for user: ${req.user.id}`)
+      const enrollmentNumber = `STU${Date.now()}${Math.floor(Math.random() * 1000)}`
+      student = new Student({
+        userId: req.user.id,
+        enrollmentNumber: enrollmentNumber,
+        status: 'enrolled'
+      })
+      await student.save()
+      student = await Student.findById(student._id).populate("userId classId parentId")
+    }
+
+    res.json(student)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
 router.post("/", roleMiddleware(["admin", "teacher"]), async (req, res) => {
   try {
     const student = new Student(req.body)

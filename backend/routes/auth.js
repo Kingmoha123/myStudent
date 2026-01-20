@@ -2,6 +2,7 @@ import express from "express"
 import jwt from "jsonwebtoken"
 import { body, validationResult } from "express-validator"
 import User from "../models/User.js"
+import Student from "../models/Student.js"
 
 const router = express.Router()
 
@@ -27,6 +28,14 @@ router.post(
         return res.status(400).json({ message: "User already exists" })
       }
 
+      // Check if admin already exists if role is admin
+      if (role === "admin") {
+        const adminExists = await User.findOne({ role: "admin" })
+        if (adminExists) {
+          return res.status(400).json({ message: "An admin already exists. Multiple admins are not allowed." })
+        }
+      }
+
       user = new User({
         email,
         password,
@@ -36,6 +45,17 @@ router.post(
       })
 
       await user.save()
+
+      // If registered as student, create a student profile
+      if (user.role === "student") {
+        const enrollmentNumber = `STU${Date.now()}${Math.floor(Math.random() * 1000)}`
+        const newStudent = new Student({
+          userId: user._id,
+          enrollmentNumber: enrollmentNumber,
+          status: 'enrolled'
+        })
+        await newStudent.save()
+      }
 
       const token = jwt.sign(
         { id: user._id, email: user.email, role: user.role },

@@ -41,7 +41,7 @@ app.use("/api/communication", authMiddleware, communicationRoutes)
 app.use("/api/fees", authMiddleware, feeRoutes)
 app.use("/api/courses", authMiddleware, courseRoutes)
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5003
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`)
 })

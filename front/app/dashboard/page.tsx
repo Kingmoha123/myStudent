@@ -48,21 +48,15 @@ export default function DashboardPage() {
   }, [token, user])
 
   const fetchStudentDashboardData = async () => {
-    if (!user) return
+    if (!user || !token) return
     try {
       const headers = { Authorization: `Bearer ${token}` }
 
       // 1. Fetch Student Profile to get Class ID
-      // Since we don't have a direct /students/me, we can find the student by userId
-      // Or we can assume the user object has what we need? No, user object is the Auth User.
-      // We need the Student document.
-      // Let's trying fetching /students?userId={user.id} if that endpoint exists or filter manually
-      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students`, { headers })
+      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/me`, { headers })
       if (!studentRes.ok) throw new Error("Failed to fetch student profile")
 
-      const allStudents = await studentRes.json()
-      // Filter to find the current student
-      const myStudentProfile = allStudents.find((s: any) => s.userId._id === user.id || s.userId === user.id)
+      const myStudentProfile = await studentRes.json()
 
       if (myStudentProfile && myStudentProfile.classId) {
         // 2. Fetch Class Details (if not already populated fully)
@@ -131,21 +125,22 @@ export default function DashboardPage() {
               ping: true
             })
           })
-
-          // Generate enrollment trend data
-          const last6Months = Array.from({ length: 6 }, (_, i) => {
-            const d = new Date()
-            d.setMonth(d.getMonth() - i)
-            return d.toLocaleString('default', { month: 'short' })
-          }).reverse()
-
-          const trend = last6Months.map(month => ({
-            name: month,
-            total: Math.floor(Math.random() * 20) + 10
-          }))
-          setEnrollmentData(trend)
         }
       }
+
+      // Generate enrollment trend data (moved outside to avoid hydration issues)
+      const last6Months = Array.from({ length: 6 }, (_, i) => {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        const currentMonth = new Date().getMonth()
+        const targetMonth = (currentMonth - i + 12) % 12
+        return monthNames[targetMonth]
+      }).reverse()
+
+      const trend = last6Months.map((month, idx) => ({
+        name: month,
+        total: 10 + (idx * 2) // Use deterministic values instead of random
+      }))
+      setEnrollmentData(trend)
 
       // Classes
       if (classesRes.status === 'fulfilled' && classesRes.value.ok) {
