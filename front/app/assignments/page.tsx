@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { Calendar as CalendarIcon, FilePenLine, Upload, CheckCircle2, Clock, Plus, BookOpen, User, Trash2, HelpCircle } from "lucide-react"
 import { format } from "date-fns"
@@ -332,7 +333,10 @@ export default function AssignmentsPage() {
     <ProtectedRoute>
       <div className="flex h-screen bg-background text-foreground">
         <Sidebar />
-        <main className="flex-1 ml-64 overflow-y-auto">
+        <main className="flex-1 md:ml-64 overflow-y-auto relative">
+          <div className="md:hidden absolute top-4 left-4 z-50">
+            <MobileSidebar />
+          </div>
           <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-between items-center mb-8">
               <div>
@@ -642,7 +646,7 @@ export default function AssignmentsPage() {
 
                 {user?.role === "student" && (
                   <div className="pt-4">
-                    {submissions.some(s => s.studentId?._id === user?.id || s.studentId === user?.id) ? (
+                    {submissions.some(s => (typeof s.studentId === 'object' ? s.studentId?._id : s.studentId) === user?.id) ? (
                       <Button className="w-full bg-muted text-muted-foreground" disabled>
                         <CheckCircle2 className="mr-2 h-4 w-4" /> Submitted
                       </Button>

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -59,7 +60,10 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ id: str
             <ProtectedRoute>
                 <div className="flex h-screen bg-background text-foreground">
                     <Sidebar />
-                    <main className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <main className="flex-1 md:ml-64 p-8 flex items-center justify-center relative">
+                        <div className="md:hidden absolute top-4 left-4 z-50">
+                            <MobileSidebar />
+                        </div>
                         <div className="animate-pulse flex flex-col items-center gap-4">
                             <GraduationCap className="h-12 w-12 text-primary opacity-20" />
                             <p className="text-muted-foreground font-medium">Loading class details...</p>
@@ -75,7 +79,10 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ id: str
             <ProtectedRoute>
                 <div className="flex h-screen bg-background text-foreground">
                     <Sidebar />
-                    <main className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <main className="flex-1 md:ml-64 p-8 flex items-center justify-center relative">
+                        <div className="md:hidden absolute top-4 left-4 z-50">
+                            <MobileSidebar />
+                        </div>
                         <div className="text-center space-y-4">
                             <h2 className="text-2xl font-bold text-destructive">Class Not Found</h2>
                             <Button onClick={() => window.history.back()}>Go Back</Button>
@@ -94,7 +101,10 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ id: str
         <ProtectedRoute>
             <div className="flex h-screen bg-background text-foreground">
                 <Sidebar />
-                <main className="flex-1 ml-64 overflow-y-auto">
+                <main className="flex-1 md:ml-64 overflow-y-auto relative">
+                    <div className="md:hidden absolute top-4 left-4 z-50 text-white">
+                        <MobileSidebar />
+                    </div>
                     <div className="bg-primary/5 border-b px-8 py-10">
                         <div className="max-w-7xl mx-auto space-y-6">
                             <Link href="/classes" className="inline-flex items-center text-sm font-medium text-primary hover:underline gap-1">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/context/AuthContext"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -275,7 +276,10 @@ export default function ClassesPage() {
       <ProtectedRoute>
         <div className="flex">
           <Sidebar />
-          <main className="flex-1 ml-64 p-8">
+          <main className="flex-1 md:ml-64 p-8 relative">
+            <div className="md:hidden absolute top-4 left-4 z-50">
+              <MobileSidebar />
+            </div>
             <p className="text-destructive">Access denied</p>
           </main>
         </div>
@@ -287,7 +291,10 @@ export default function ClassesPage() {
     <ProtectedRoute>
       <div className="flex h-screen bg-background text-foreground">
         <Sidebar />
-        <main className="flex-1 ml-64 overflow-y-auto">
+        <main className="flex-1 md:ml-64 overflow-y-auto relative">
+          <div className="md:hidden absolute top-4 left-4 z-50">
+            <MobileSidebar />
+          </div>
           {/* Header Section */}
           <div className="bg-primary/5 border-b px-8 py-12">
             <div className="flex justify-between items-center max-w-7xl mx-auto">

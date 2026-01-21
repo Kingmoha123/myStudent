@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -179,7 +180,10 @@ export default function CoursesPage() {
         <ProtectedRoute>
             <div className="flex h-screen bg-background text-foreground">
                 <Sidebar />
-                <main className="flex-1 ml-64 overflow-y-auto p-8">
+                <main className="flex-1 md:ml-64 overflow-y-auto p-8 relative">
+                    <div className="md:hidden absolute top-4 left-4 z-50">
+                        <MobileSidebar />
+                    </div>
                     <div className="flex justify-between items-center mb-8">
                         <div>
                             <h1 className="text-3xl font-bold flex items-center gap-3">

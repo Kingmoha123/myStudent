@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -170,7 +171,10 @@ export default function CommunicationPage() {
     <ProtectedRoute>
       <div className="flex h-screen bg-background text-foreground">
         <Sidebar />
-        <main className="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
+        <main className="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden relative">
+          <div className="md:hidden absolute top-[1.3rem] left-4 z-50">
+            <MobileSidebar />
+          </div>
           {/* Header */}
           <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
             <div className="flex items-center justify-between">

@@ -4,6 +4,7 @@ import type React from "react"
 
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
@@ -68,7 +69,10 @@ export default function ProfilePage() {
     <ProtectedRoute>
       <div className="flex bg-background min-h-screen">
         <Sidebar />
-        <main className="flex-1 ml-64 overflow-y-auto">
+        <main className="flex-1 md:ml-64 overflow-y-auto relative">
+          <div className="md:hidden absolute top-4 left-4 z-50 text-white">
+            <MobileSidebar />
+          </div>
           {/* Header with gradient background */}
           <div className="h-48 bg-gradient-to-r from-primary/80 to-primary/40 relative">
             <div className="absolute -bottom-16 left-8 flex items-end">

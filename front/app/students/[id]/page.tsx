@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -110,7 +111,10 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
             <ProtectedRoute>
                 <div className="flex h-screen bg-background text-foreground">
                     <Sidebar />
-                    <main className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <main className="flex-1 md:ml-64 p-8 flex items-center justify-center relative">
+                        <div className="md:hidden absolute top-4 left-4 z-50">
+                            <MobileSidebar />
+                        </div>
                         Loading Profile...
                     </main>
                 </div>
@@ -123,7 +127,10 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
             <ProtectedRoute>
                 <div className="flex h-screen bg-background text-foreground">
                     <Sidebar />
-                    <main className="flex-1 ml-64 p-8">
+                    <main className="flex-1 md:ml-64 p-8 relative">
+                        <div className="md:hidden absolute top-4 left-4 z-50">
+                            <MobileSidebar />
+                        </div>
                         <div className="text-center">
                             <h2 className="text-2xl font-bold text-destructive">Student Not Found</h2>
                             <p className="text-muted-foreground">The requested student profile could not be located.</p>
@@ -139,7 +146,10 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
         <ProtectedRoute>
             <div className="flex h-screen bg-background text-foreground">
                 <Sidebar />
-                <main className="flex-1 ml-64 overflow-y-auto">
+                <main className="flex-1 md:ml-64 overflow-y-auto relative">
+                    <div className="md:hidden absolute top-4 left-4 z-50 text-white">
+                        <MobileSidebar />
+                    </div>
                     {/* Header / Banner - Reverted to Original Theme */}
                     <div className="bg-primary/5 text-foreground p-10 pb-20 border-b relative overflow-hidden">
                         <Link href="/students" className="inline-flex items-center gap-2 text-primary hover:underline transition-colors mb-8 group relative z-10 font-medium">

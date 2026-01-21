@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -222,7 +223,10 @@ export default function UsersPage() {
       <ProtectedRoute>
         <div className="flex">
           <Sidebar />
-          <main className="flex-1 ml-64 p-8">
+          <main className="flex-1 md:ml-64 p-8 relative">
+            <div className="md:hidden absolute top-4 left-4 z-50">
+              <MobileSidebar />
+            </div>
             <p className="text-destructive">Access denied. Only Admins can view this page.</p>
           </main>
         </div>
@@ -234,7 +238,10 @@ export default function UsersPage() {
     <ProtectedRoute>
       <div className="flex h-screen bg-background text-foreground">
         <Sidebar />
-        <main className="flex-1 ml-64 overflow-y-auto">
+        <main className="flex-1 md:ml-64 overflow-y-auto relative">
+          <div className="md:hidden absolute top-4 left-4 z-50">
+            <MobileSidebar />
+          </div>
           <div className="p-8">
             <div className="flex justify-between items-center mb-8">
               <div>
@@ -315,7 +322,6 @@ export default function UsersPage() {
                                   <SelectItem value="teacher">Teacher</SelectItem>
                                   <SelectItem value="parent">Parent</SelectItem>
                                   <SelectItem value="accountant">Accountant</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -532,7 +538,6 @@ export default function UsersPage() {
                             <SelectItem value="teacher">Teacher</SelectItem>
                             <SelectItem value="parent">Parent</SelectItem>
                             <SelectItem value="accountant">Accountant</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

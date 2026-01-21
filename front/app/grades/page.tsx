@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/context/AuthContext"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -348,7 +349,10 @@ export default function GradesPage() {
     <ProtectedRoute>
       <div className="flex h-screen bg-background">
         <Sidebar />
-        <main className="flex-1 ml-64 p-8 overflow-y-auto w-full">
+        <main className="flex-1 md:ml-64 p-8 overflow-y-auto w-full relative">
+          <div className="md:hidden absolute top-4 left-4 z-50">
+            <MobileSidebar />
+          </div>
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Grades & Reports</h1>
