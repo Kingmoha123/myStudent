@@ -95,6 +95,9 @@ export default function AssignmentsPage() {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false)
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+
   // Forms
   const [assignmentForm, setAssignmentForm] = useState<{
     title: string
@@ -206,11 +209,17 @@ export default function AssignmentsPage() {
     }
   }
 
-  const handleCreateAssignment = async (e: React.FormEvent) => {
+  const handleSaveAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments`, {
-        method: "POST",
+      const url = isEditing
+        ? `${process.env.NEXT_PUBLIC_API_URL}/assignments/${editingId}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/assignments`
+
+      const method = isEditing ? "PUT" : "POST"
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -223,22 +232,65 @@ export default function AssignmentsPage() {
       })
 
       if (response.ok) {
-        toast.success("Assignment created!")
-        setAssignmentForm({
-          title: "",
-          description: "",
-          subject: "",
-          dueDate: "",
-          totalPoints: 100,
-          questions: []
-        })
+        toast.success(isEditing ? "Assignment updated!" : "Assignment created!")
+        resetAssignmentForm()
         setIsCreateDialogOpen(false)
         fetchAssignments(selectedClass)
       } else {
-        toast.error("Failed to create assignment")
+        toast.error(`Failed to ${isEditing ? "update" : "create"} assignment`)
       }
     } catch (error) {
-      console.error("Failed to create assignment:", error)
+      console.error(`Failed to ${isEditing ? "update" : "create"} assignment:`, error)
+      toast.error("An error occurred")
+    }
+  }
+
+  const resetAssignmentForm = () => {
+    setAssignmentForm({
+      title: "",
+      description: "",
+      subject: "",
+      dueDate: "",
+      totalPoints: 100,
+      questions: []
+    })
+    setIsEditing(false)
+    setEditingId(null)
+  }
+
+  const handleEditAssignment = (e: React.MouseEvent, assignment: Assignment) => {
+    e.stopPropagation()
+    setAssignmentForm({
+      title: assignment.title,
+      description: assignment.description,
+      subject: assignment.subject,
+      dueDate: new Date(assignment.dueDate).toISOString().split('T')[0],
+      totalPoints: assignment.totalPoints,
+      questions: assignment.questions || []
+    })
+    setEditingId(assignment._id)
+    setIsEditing(true)
+    setIsCreateDialogOpen(true)
+  }
+
+  const handleDeleteAssignment = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    if (!confirm("Are you sure you want to delete this assignment?")) return
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (response.ok) {
+        toast.success("Assignment deleted")
+        fetchAssignments(selectedClass)
+      } else {
+        toast.error("Failed to delete assignment")
+      }
+    } catch (error) {
+      console.error("Delete error:", error)
       toast.error("An error occurred")
     }
   }
@@ -346,16 +398,16 @@ export default function AssignmentsPage() {
               {user?.role === "teacher" && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button onClick={() => resetAssignmentForm()}>
                       <Plus className="mr-2 h-4 w-4" /> Create Assignment
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>Create New Assignment / Quiz</DialogTitle>
-                      <DialogDescription>Add a new task or quiz for your students.</DialogDescription>
+                      <DialogTitle>{isEditing ? "Edit Assignment / Quiz" : "Create New Assignment / Quiz"}</DialogTitle>
+                      <DialogDescription>{isEditing ? "Modify existing task or quiz." : "Add a new task or quiz for your students."}</DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleCreateAssignment} className="space-y-4 py-2">
+                    <form onSubmit={handleSaveAssignment} className="space-y-4 py-2">
                       {/* Basic Info */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -532,7 +584,7 @@ export default function AssignmentsPage() {
                       </div>
 
                       <DialogFooter>
-                        <Button type="submit" className="w-full">Create Assignment</Button>
+                        <Button type="submit" className="w-full">{isEditing ? "Update Assignment" : "Create Assignment"}</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -571,9 +623,21 @@ export default function AssignmentsPage() {
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start">
                           <Badge variant="outline" className="mb-2">{assignment.subject}</Badge>
-                          <Badge variant="secondary" className={`${status.bg} ${status.color} hover:${status.bg}`}>
-                            {status.text}
-                          </Badge>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="secondary" className={`${status.bg} ${status.color} hover:${status.bg}`}>
+                              {status.text}
+                            </Badge>
+                            {user?.role === 'teacher' && (
+                              <div className="flex gap-1 ml-2">
+                                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => handleEditAssignment(e, assignment)}>
+                                  <FilePenLine className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={(e) => handleDeleteAssignment(e, assignment._id)}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <CardTitle className="text-xl line-clamp-1">{assignment.title}</CardTitle>
                         <CardDescription className="line-clamp-2">{assignment.description || "No description provided."}</CardDescription>

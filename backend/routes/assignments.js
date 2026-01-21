@@ -84,4 +84,29 @@ router.get("/submissions/:assignmentId", roleMiddleware(["teacher", "admin", "st
   }
 })
 
+router.put("/:id", roleMiddleware(["teacher", "admin"]), async (req, res) => {
+  try {
+    const assignment = await Assignment.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate("classId teacherId")
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" })
+    }
+    res.json(assignment)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
+router.delete("/:id", roleMiddleware(["teacher", "admin"]), async (req, res) => {
+  try {
+    const assignment = await Assignment.findByIdAndDelete(req.params.id)
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" })
+    }
+    res.json({ message: "Assignment deleted" })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
 export default router

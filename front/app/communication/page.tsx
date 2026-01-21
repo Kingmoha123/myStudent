@@ -83,13 +83,17 @@ export default function CommunicationPage() {
 
   // Users for recipient selection
   const [users, setUsers] = useState<User[]>([])
+  const [studentProfile, setStudentProfile] = useState<any>(null)
 
   useEffect(() => {
     if (token) {
       fetchMessages()
       fetchUsers()
+      if (user?.role === 'student') {
+        fetchStudentProfile()
+      }
     }
-  }, [token])
+  }, [token, user?.role])
 
   const fetchMessages = async () => {
     try {
@@ -130,6 +134,20 @@ export default function CommunicationPage() {
     }
   }
 
+  const fetchStudentProfile = async () => {
+    if (!token) return
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!response.ok) throw new Error("Failed to fetch profile")
+      const data = await response.json()
+      setStudentProfile(data)
+    } catch (error) {
+      console.error("Failed to fetch student profile", error)
+    }
+  }
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -165,7 +183,17 @@ export default function CommunicationPage() {
     // API call placeholder - assumes backend marks read on fetch or dedicated endpoint
   }
 
-  const filteredUsers = Array.isArray(users) ? users.filter(u => u._id !== user?.id) : [];
+  const filteredUsers = Array.isArray(users) ? users.filter(u => {
+    if (u._id === user?.id) return false;
+
+    // If student, only show their parent
+    if (user?.role === 'student') {
+      const parentId = typeof studentProfile?.parentId === 'object' ? studentProfile.parentId?._id : studentProfile?.parentId;
+      return u._id === parentId;
+    }
+
+    return true;
+  }) : [];
 
   return (
     <ProtectedRoute>
@@ -261,7 +289,11 @@ export default function CommunicationPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col">
-                    {messages.map((message) => (
+                    {messages.filter(m => {
+                      if (user?.role !== 'student' || !studentProfile) return true;
+                      const parentId = typeof studentProfile?.parentId === 'object' ? studentProfile.parentId?._id : studentProfile?.parentId;
+                      return m.senderId?._id === parentId || m.senderId === parentId;
+                    }).map((message) => (
                       <button
                         key={message._id}
                         onClick={() => {

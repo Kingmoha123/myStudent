@@ -48,17 +48,32 @@ export default function DashboardPage() {
   const [enrollmentData, setEnrollmentData] = useState<any[]>([])
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
+
     if (token && user) {
       setLoading(true);
-      if (user.role === "student") {
-        fetchStudentDashboardData()
-      } else if (user.role === "teacher") {
-        fetchTeacherDashboardData()
-      } else if (user.role === "parent") {
-        fetchParentDashboardData()
-      } else {
-        fetchAdminDashboardData() // Previously fetchDashboardData
+      const fetchData = () => {
+        if (user.role === "student") {
+          fetchStudentDashboardData()
+        } else if (user.role === "teacher") {
+          fetchTeacherDashboardData()
+        } else if (user.role === "parent") {
+          fetchParentDashboardData()
+        } else {
+          fetchAdminDashboardData()
+        }
       }
+
+      fetchData();
+
+      // For student and parent, poll for attendance updates every 10 seconds
+      if (user.role === "student" || user.role === "parent") {
+        interval = setInterval(fetchData, 10000);
+      }
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
     }
   }, [token, user])
 
