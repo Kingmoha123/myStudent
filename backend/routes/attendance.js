@@ -34,7 +34,11 @@ router.post("/bulk", roleMiddleware(["teacher"]), async (req, res) => {
 
     const operations = items.map((item) => ({
       updateOne: {
-        filter: { studentId: item.studentId, classId: item.classId, date: new Date(item.date) },
+        filter: {
+          studentId: new mongoose.Types.ObjectId(item.studentId),
+          classId: new mongoose.Types.ObjectId(item.classId),
+          date: new Date(item.date)
+        },
         update: { status: item.status },
         upsert: true,
       },
@@ -76,7 +80,7 @@ router.get("/class/:classId", async (req, res) => {
 
 router.get("/student/:studentId", async (req, res) => {
   try {
-    const attendance = await Attendance.find({ studentId: req.params.studentId }).populate("classId", "name")
+    const attendance = await Attendance.find({ studentId: new mongoose.Types.ObjectId(req.params.studentId) }).populate("classId", "name")
     res.json(attendance)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -86,15 +90,12 @@ router.get("/student/:studentId", async (req, res) => {
 // Get attendance stats for a student
 router.get("/stats/student/:studentId", async (req, res) => {
   try {
-    const total = await Attendance.countDocuments({ studentId: req.params.studentId })
+    const sId = new mongoose.Types.ObjectId(req.params.studentId)
+    const total = await Attendance.countDocuments({ studentId: sId })
     const present = await Attendance.countDocuments({
-      studentId: req.params.studentId,
-      status: { $in: ["present", "late"] } // Counting late as present for now, or we can separate
+      studentId: sId,
+      status: { $in: ["present", "late"] }
     })
-
-    // Simple calculation: Status 'present' or 'late' counts as present. 'absent'/'excused' as absent.
-    // Or maybe just 'present'. Let's stick strictly to 'present' if strict, but schools often count late as present.
-    // Let's count "present" and "late" as Attended.
 
     const percentage = total === 0 ? 0 : Math.round((present / total) * 100)
 
