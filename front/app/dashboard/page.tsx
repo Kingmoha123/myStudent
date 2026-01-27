@@ -408,7 +408,7 @@ export default function DashboardPage() {
       title: "Student Fees",
       value: `$${stats.fees.toLocaleString()}`,
       icon: CreditCard,
-      color: "text-emerald-600 bg-emerald-100",
+      color: "text-teal-600 bg-teal-100",
       show: user?.role === 'admin' || user?.role === 'accountant',
       href: "/fees"
     },
