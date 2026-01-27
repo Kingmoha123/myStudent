@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Sidebar } from "@/components/Sidebar"
 import { MobileSidebar } from "@/components/MobileSidebar"
 import { useAuth } from "@/context/AuthContext"
-import { Users, BookOpen, ClipboardList, MessageSquare, TrendingUp, Clock, AlertCircle, Calendar, GraduationCap } from "lucide-react"
+import { Users, BookOpen, ClipboardList, MessageSquare, TrendingUp, Clock, AlertCircle, Calendar, GraduationCap, CreditCard } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { toast } from "sonner"
@@ -16,7 +16,6 @@ export default function DashboardPage() {
   const { user, token } = useAuth()
   const router = useRouter()
 
-  // Dashboard Stats State (General)
   const [stats, setStats] = useState({
     students: 0,
     classes: 0,
@@ -24,6 +23,7 @@ export default function DashboardPage() {
     courses: 0,
     assignments: 0,
     messages: 0,
+    fees: 0,
   })
   const [activities, setActivities] = useState<any[]>([])
 
@@ -214,17 +214,18 @@ export default function DashboardPage() {
       const headers = { Authorization: `Bearer ${token}` }
 
       // Parallel Fetching
-      const [studentsRes, classesRes, assignmentsRes, messagesRes, attendanceRes, usersRes, coursesRes] = await Promise.allSettled([
+      const [studentsRes, classesRes, assignmentsRes, messagesRes, attendanceRes, usersRes, coursesRes, feesRes] = await Promise.allSettled([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/students`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/communication/inbox`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/attendance`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, { headers })
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/fees`, { headers })
       ])
 
-      const newStats = { students: 0, classes: 0, assignments: 0, messages: 0, teachers: 0, courses: 0 }
+      const newStats = { students: 0, classes: 0, assignments: 0, messages: 0, teachers: 0, courses: 0, fees: 0 }
       const allActivities: any[] = []
 
       // Students
@@ -330,6 +331,14 @@ export default function DashboardPage() {
         }
       }
 
+      // Fees
+      if (feesRes.status === 'fulfilled' && feesRes.value.ok) {
+        const data = await feesRes.value.json()
+        if (Array.isArray(data)) {
+          newStats.fees = data.filter((f: any) => f.status === 'Paid').reduce((acc: number, f: any) => acc + f.amount, 0)
+        }
+      }
+
       // Sort activities by time desc
       const sortedActivities = allActivities
         .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
@@ -394,6 +403,14 @@ export default function DashboardPage() {
       color: "text-purple-600 bg-purple-100",
       show: true,
       href: "/communication"
+    },
+    {
+      title: "Student Fees",
+      value: `$${stats.fees.toLocaleString()}`,
+      icon: CreditCard,
+      color: "text-emerald-600 bg-emerald-100",
+      show: user?.role === 'admin' || user?.role === 'accountant',
+      href: "/fees"
     },
   ]
 
