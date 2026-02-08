@@ -30,7 +30,7 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
-    
+
     if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.some(allowed => origin?.startsWith(allowed))) {
       callback(null, true)
     } else {
@@ -45,7 +45,7 @@ app.use(express.json())
 
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb+srv://mohan21:123@cluster0.afaipw7.mongodb.net/?appName=Cluster0")
+  .connect(process.env.MONGODB_URI || "mongodb+srv://mohan21:123@cluster0.afaipw7.mongodb.net/sms_db_s?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err))
 
